@@ -1,0 +1,21 @@
+plugins {
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':lib')
+}
+
+application {
+    mainClass = 'example.Example'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'example.Example'
+    }
+}
