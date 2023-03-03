@@ -12,6 +12,6 @@ public class VersionDependency {
 	
 	public Optional<String> versionId;
 	public Optional<String> projectId;
-	public Optional<String> fileName;
+	public Optional<String> filename;
 	public Enforcement enforcementPolicy;
 }

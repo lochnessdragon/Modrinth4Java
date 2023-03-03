@@ -10,7 +10,7 @@ public class VersionFile {
 			SHA1
 		}
 		
-		Algorithm hashAlgo;
+		Algorithm algo;
 		String hash;
 	}
 	
