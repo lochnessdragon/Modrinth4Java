@@ -2,6 +2,7 @@ package example;
 
 import com.github.lochnessdragon.modrinth4java.ModrinthAPI;
 import com.github.lochnessdragon.modrinth4java.Project;
+import com.github.lochnessdragon.modrinth4java.ProjectVersion;
 
 public class Example {
 

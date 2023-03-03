@@ -19,7 +19,7 @@ public class VersionDependency {
 	public Enforcement enforcementPolicy;
 
     public VersionDependency(Enforcement policy) {
-        VersionDepedency(policy, Optional.empty(), Optional.empty(), Optional.empty());
+        this(policy, Optional.empty(), Optional.empty(), Optional.empty());
     }
 
     public VersionDependency(Enforcement policy, String versionId, String projectId, String filename) {

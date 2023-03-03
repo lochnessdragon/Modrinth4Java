@@ -129,24 +129,42 @@ public class Project {
 		}
 		
 		if (this.versionIds.size() > 0) {
-			repr += " - Versions:\n";
-			for (String version : this.versionIds) {
-				repr += "   - " + version + "\n";
+			repr += " - Versions: [";
+			for (int i = 0; i < this.versionIds.size(); i++) {
+				repr += this.versionIds.get(i);
+
+                if (i < this.versionIds.size() - 1) {
+                    repr += ", ";
+                }
 			}
+
+            repr += "]\n";
 		}
 		
 		if (this.gameVersions.size() > 0) {
-			repr += " - Minecraft Versions:\n";
-			for (String version : this.gameVersions) {
-				repr += "   - " + version + "\n";
+			repr += " - Minecraft Versions: [";
+			for (int i = 0; i < this.gameVersions.size(); i++) {
+				repr += this.gameVersions.get(i);
+
+                if (i < this.gameVersions.size() - 1) {
+                    repr += ", ";
+                }
 			}
+
+            repr += "]\n";
 		}
 		
 		if (this.modLoaders.size() > 0) {
-			repr += " - Mod Loader:\n";
-			for (String loader : this.modLoaders) {
-				repr += "   - " + loader + "\n";
+			repr += " - Mod Loaders: [";
+			for (int i = 0; i < this.modLoaders.size(); i++) {
+				repr += this.modLoaders.get(i);
+
+                if (i < this.modLoaders.size() - 1) {
+                    repr += ", ";
+                }
 			}
+
+            repr += "]\n";
 		}
 		
 		if (this.images.size() > 0) {

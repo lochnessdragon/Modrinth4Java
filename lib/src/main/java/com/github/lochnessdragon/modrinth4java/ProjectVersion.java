@@ -72,7 +72,7 @@ public class ProjectVersion {
         }
         repr += "\n";
 
-        repr += " - Project: " + this.projectId + " Author: " + this.authorId;
+        repr += " - Project: " + this.projectId + " Author: " + this.authorId + "\n";
         if(gameVersions.size() > 0) {
             repr += " - MC Versions: [";
             for (int i = 0; i < gameVersions.size(); i++) {
@@ -98,8 +98,8 @@ public class ProjectVersion {
         repr += " - Published at: " + this.publishedAt + "\n";
         repr += " - Download Count: " + this.downloads + "\n";
 
-        if (this.changelog.isPresent()) {
-            repr += "Changelog\n" + this.changelog.get();
+        if (this.changelog.isPresent() && this.changelog.get() != "") {
+            repr += "Changelog:\n" + this.changelog.get();
         }
 
         for (VersionFile file : files) {

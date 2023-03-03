@@ -3,11 +3,12 @@ package com.github.lochnessdragon.modrinth4java;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Iterator;
 
 import org.json.JSONObject;
 
 public class VersionFile {
-	public class Hash {
+	public static class Hash {
 		public enum Algorithm {
 			SHA512,
 			SHA1
