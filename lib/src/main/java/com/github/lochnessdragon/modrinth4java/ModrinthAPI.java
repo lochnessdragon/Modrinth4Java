@@ -14,7 +14,19 @@ import org.json.JSONObject;
 * modrinth endpoint without authentication.
 */
 public class ModrinthAPI {
-    public static String BASE_URL = "https://api.modrinth.com/v2/";
+    protected static String BASE_URL = "https://api.modrinth.com/v2/";
+
+	public static String getBaseUrl() {
+		return BASE_URL;
+	}
+
+	public static void useStagingUrl() {
+		BASE_URL = "https://staging-api.modrinth.com/v2/";
+	}
+
+	public static void useProdUrl() {
+		BASE_URL = "https://api.modrinth.com/v2/";
+	}
 
 	protected static JSONObject convertInputStreamToJson(InputStream stream) {
 		try {
@@ -52,4 +64,21 @@ public class ModrinthAPI {
 			throw new RuntimeException("Failed to grab project details for project: " + id);
         }
     }
+
+	public static ProjectVersion getVersion(String id) {
+		try {
+			URL endpointUrl = new URL(BASE_URL + "version/" + id);
+			HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
+
+			// handle response
+			JSONObject parsedJson = convertInputStreamToJson((InputStream) connection.getContent());
+
+			ProjectVersion version = ProjectVersion.fromJson(parsedJson);
+			return version;
+		} catch (Exception e) {
+			System.err.println("Failed to grab the version details for: " + id);
+			e.printStackTrace();
+			throw new RuntimeException("Failed to grab the details for: " + id);
+		}
+	}
 }

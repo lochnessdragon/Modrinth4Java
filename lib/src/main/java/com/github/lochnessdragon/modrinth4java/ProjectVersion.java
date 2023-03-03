@@ -3,6 +3,7 @@ package com.github.lochnessdragon.modrinth4java;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,6 +41,25 @@ public class ProjectVersion {
 	public int downloads;
 	public List<VersionFile> files;
 
+	public ProjectVersion(String id, String name, Type type, String versionNumber, Status status, String projectId, String authorId) {
+		this.id = id;
+		this.name = name;
+		this.type = type;
+		this.versionNumber = versionNumber;
+		this.status = status;
+		this.projectId = projectId;
+		this.authorId = authorId;
+		this.downloads = 0;
+		this.changelog = Optional.empty();
+		this.dependencies = new ArrayList<VersionDependency>();
+		this.gameVersions = new ArrayList<String>();
+		this.modLoaders = new ArrayList<String>();
+		this.featured = false;
+		this.requestedStatus = Optional.empty();
+		this.publishedAt = OffsetDateTime.now();
+		this.files = new ArrayList<VersionFile>();
+	}
+	
     @Override
     public String toString() {
         String repr = featured ? "**FEATURED** " : "";
@@ -104,7 +124,57 @@ public class ProjectVersion {
         return repr;
     }
 
-    public static ProjectVersion.fromJson(JSONObject json) {
-        return new ProjectVersion();
+    public static ProjectVersion fromJson(JSONObject json) {
+        String id = json.getString("id");
+		String projectId = json.getString("project_id");
+		String authorId = json.getString("author_id");
+		Type versionType = Type.valueOf(json.getString("version_type").toUpperCase());
+		Status versionStatus = Status.valueOf(json.getString("status").toUpperCase());
+		String name = json.getString("name");
+		String versionNumber = json.getString("version_number");
+		ProjectVersion version = new ProjectVersion(id, name, versionType, versionNumber, versionStatus, projectId, authorId);
+
+		// read changelog
+		if (json.has("changelog") && !json.isNull("changelog")) {
+			version.changelog = Optional.of(json.getString("changelog"));
+		}
+
+		// read dependencies
+		JSONArray dependencies = json.getJSONArray("dependencies");
+		for (Object dependencyObj : dependencies) {
+			version.dependencies.add(VersionDependency.fromJson((JSONObject) dependencyObj));
+		}
+
+        // read game versions
+        for (Object gameVersion : json.getJSONArray("game_versions")) {
+            version.gameVersions.add((String) gameVersion);
+        }
+
+        // read loader versions
+        for (Object modLoader : json.getJSONArray("loaders")) {
+            version.modLoaders.add((String) modLoader);
+        }
+
+        // is the version featured
+        version.featured = json.getBoolean("featured");
+
+        // the new requested status (only used sometimes)
+        if(json.has("requested_status") && !json.isNull("requested_status")) {
+            version.requestedStatus = Optional.of(Status.valueOf(json.getString("requested_status").toUpperCase()));
+        }
+
+        // the date it was published
+        version.publishedAt = OffsetDateTime.parse(json.getString("date_published"));
+
+        // downloads for the project
+        version.downloads = json.getInt("downloads");
+
+        // files
+        JSONArray filesArray = json.getJSONArray("files");
+        for (Object file : filesArray) {
+            version.files.add(VersionFile.fromJson((JSONObject) file));
+        }
+		
+		return version;
     }
 }

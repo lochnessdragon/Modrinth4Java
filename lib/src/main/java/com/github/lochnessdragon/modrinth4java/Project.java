@@ -159,6 +159,11 @@ public class Project {
 		return repr;
 	}
 
+    public ProjectVersion getVersion(int index) {
+        String id = this.versionIds.get(index);
+        return ModrinthAPI.getVersion(id);
+    }
+    
 	public static void createNew() {}
 
 	public static Project fromJson(JSONObject json) {

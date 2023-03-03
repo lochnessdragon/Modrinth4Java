@@ -10,5 +10,9 @@ public class Example {
         Project fabricApi = ModrinthAPI.getProject("fabric-api");
 		System.out.println("Recovered Project Details:");
 		System.out.println(fabricApi);
+
+        ProjectVersion fabricLatestVersion = fabricApi.getVersion(0);
+        System.out.println("Latest version:");
+        System.out.println(fabricLatestVersion);
     }
 }
