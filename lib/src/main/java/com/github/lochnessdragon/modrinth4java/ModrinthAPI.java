@@ -1,12 +1,13 @@
 package com.github.lochnessdragon.modrinth4java;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.net.URL;
-import java.io.InputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import org.json.JSONObject;
-import java.util.Optional;
 
 /**
 * Represents all the methods that can be performed on the 
@@ -42,8 +43,7 @@ public class ModrinthAPI {
 			InputStream content = (InputStream) connection.getContent();
 			
 			JSONObject parsedJson = convertInputStreamToJson(content);
-			System.out.println(parsedJson.toString());
-
+			
 			Project project = Project.fromJson(parsedJson);
         	return project;
 		} catch (Exception e) {
