@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -28,23 +31,41 @@ public class ModrinthAPI {
 		BASE_URL = "https://api.modrinth.com/v2/";
 	}
 
-	protected static JSONObject convertInputStreamToJson(InputStream stream) {
-		try {
-			BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-			StringBuilder strBuilder = new StringBuilder();
+    protected static String convertISToStr(InputStream stream) {
+        BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+		StringBuilder strBuilder = new StringBuilder();
 
-			String inputStr;
-    		while ((inputStr = streamReader.readLine()) != null) {
-        		strBuilder.append(inputStr);
-			}
-			JSONObject json = new JSONObject(strBuilder.toString());
+		String inputStr;
+    	while ((inputStr = streamReader.readLine()) != null) {
+        	strBuilder.append(inputStr);
+		}
+
+        return strBuilder.toString();
+    }
+    
+	protected static JSONObject convertISToObject(InputStream stream) {
+		try {
+			String jsonStr = convertISToStr(stream);
+			JSONObject json = new JSONObject(jsonStr);
 			return json;
 		} catch (Exception e) {
-			System.err.println("Failed to parse json.");
+			System.err.println("Failed to convert stream to object.");
 			e.printStackTrace();
-			throw new RuntimeException("Failed to parse json.");
+			throw new RuntimeException("Failed to convert stream to object.");
 		}
 	}
+
+    protected static JSONArray convertISToArray(InputStream stream) {
+        try {
+            String jsonStr = convertISToStr(stream);
+            JSONArray json = new JSONArray(jsonStr);
+            return json;
+        } catch (Exception e) {
+            System.err.println("Failed to convert stream to array.");
+            e.printStackTrace();
+            throw new RuntimeException("Failed to convert stream to array.");
+        }
+    }
 	
     public static Project getProject(String id) {
         try {
@@ -54,7 +75,7 @@ public class ModrinthAPI {
 			// handle response
 			InputStream content = (InputStream) connection.getContent();
 			
-			JSONObject parsedJson = convertInputStreamToJson(content);
+			JSONObject parsedJson = convertISToObject(content);
 			
 			Project project = Project.fromJson(parsedJson);
         	return project;
@@ -65,13 +86,82 @@ public class ModrinthAPI {
         }
     }
 
+    public static Map<String, Project> getMultipleProjects(String[] ids) {
+        try {
+            String idsParam = "[";
+            for (int i = 0; i < ids.size(); i++) {
+                idsParam += "\"" + ids[i] + "\"";
+                if (i < ids.size() - 1) {
+                    idsParam += ",";
+                }
+            }
+            idsParam += "]";
+
+            URL endpointUrl = new URL(BASE_URL + "projects/?ids=" + idsParam);
+            HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.connect();
+            InputStream content = connection.getContent();
+
+            JSONArray parsedArray = convertISToArray(content);
+
+            Map<String, Project> projects = new HashMap<String, Project>();
+
+            
+        } catch (Exception e) {
+            System.err.println("Failed to grab multiple project details for: " + ids);
+            e.printStackTrace();
+            throw new RuntimeException("Failed to grab multiple project details for: " + ids);
+        }
+    }
+
+    public static enum SortMethod {
+        RELEVANCE,
+        DOWNLOADS,
+        FOLLOWS,
+        NEWEST,
+        UPDATED
+    }
+
+    public static Project[] searchProjects(String query, String facets = "", SortMethod sortMethod = SortMethod.RELEVANCE, int offset = 0, int limit = 20) {
+        try {
+            String urlStr = BASE_URL + "search/?";
+            if (query != "") {
+                urlStr += "query=" + URLEncoder.encode(query) + "&";
+            }
+            if(facets != "") {
+                urlStr += "facets=" + facets + "&";
+            }
+
+            urlStr += "index=" + sortMethod.toString().toLowerCase() + "&offset=" + offset + "&limit=" + limit;
+            
+            URL endpointUrl = new URL(urlStr);
+            HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
+            InputStream content = (InputStream) connection.getContent();
+
+            JSONObject parsedJson = convertISToObject(content);
+
+            int totalHits = parsedJson.getInt("total_hits");
+            Project[] projects = new Project[totalHits];
+            
+            JSONArray projectsJson = parsedJson.getJSONArray("hits");
+            for (int i = 0; i < totalHits; i++) {
+                projects[i] = Project.fromJson(projectsJson.getJSONObject(i));
+            }
+
+            return projects;
+        } catch (Exception e) {
+            System.err.println("Failed to search modrinth: query=" + query);
+            e.printStackTrace();
+            throw new RuntimeException("Failed to search modrinth: query=" + query);
+        }
+    }
+
 	public static ProjectVersion getVersion(String id) {
 		try {
 			URL endpointUrl = new URL(BASE_URL + "version/" + id);
 			HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
 
 			// handle response
-			JSONObject parsedJson = convertInputStreamToJson((InputStream) connection.getContent());
+			JSONObject parsedJson = convertISToObject((InputStream) connection.getContent());
 
 			ProjectVersion version = ProjectVersion.fromJson(parsedJson);
 			return version;
