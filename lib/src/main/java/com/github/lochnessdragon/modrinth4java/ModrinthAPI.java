@@ -160,11 +160,11 @@ public class ModrinthAPI {
             JSONObject parsedJson = convertISToObject(content);
 
             int totalHits = parsedJson.getInt("total_hits");
-            Project[] projects = new Project[totalHits];
+            ProjectSearchResult[] projects = new ProjectSearchResult[totalHits];
             
             JSONArray projectsJson = parsedJson.getJSONArray("hits");
             for (int i = 0; i < totalHits; i++) {
-                projects[i] = Project.fromJson(projectsJson.getJSONObject(i));
+                projects[i] = ProjectSearchResult.fromJson(projectsJson.getJSONObject(i));
             }
 
             return projects;
