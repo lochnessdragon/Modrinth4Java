@@ -15,5 +15,7 @@ public class Example {
         ProjectVersion fabricLatestVersion = fabricApi.getVersion(0);
         System.out.println("Latest version:");
         System.out.println(fabricLatestVersion);
+
+        Project[] searchResults = ModrinthAPI.searchProjects("gravestone");
     }
 }

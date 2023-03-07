@@ -45,10 +45,11 @@ public class FacetBuilder {
     private String addSet(String jsonSoFar, String key, Set<String> values) {
         if (values.size() > 0) {
             jsonSoFar += "[";
-            for (int i = 0; i < values.size(); i++) {
+            int idx = 0;
+            for (String value : values) {
                 String kvPair = key + ":" + value;
                 jsonSoFar += "\"" + kvPair + "\"";
-                if (i < values.size() - 1) {
+                if (idx < values.size() - 1) {
                     jsonSoFar += ",";
                 }
             }

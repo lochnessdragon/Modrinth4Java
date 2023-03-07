@@ -11,6 +11,7 @@ import java.util.HashMap;
 import javax.net.ssl.HttpsURLConnection;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 /**
 * Represents all the methods that can be performed on the 
@@ -32,15 +33,21 @@ public class ModrinthAPI {
 	}
 
     protected static String convertISToStr(InputStream stream) {
-        BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
-		StringBuilder strBuilder = new StringBuilder();
+        try {
+        	BufferedReader streamReader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        	StringBuilder strBuilder = new StringBuilder();
 
-		String inputStr;
-    	while ((inputStr = streamReader.readLine()) != null) {
-        	strBuilder.append(inputStr);
-		}
+        	String inputStr;
+    		while ((inputStr = streamReader.readLine()) != null) {
+        	    strBuilder.append(inputStr);
+	    	}
 
-        return strBuilder.toString();
+        	return strBuilder.toString();
+        } catch (Exception e) {
+            System.err.println("Failed to convert input stream to str.");
+            e.printStackTrace();
+            throw new RuntimeException("Failed to convert input stream to str.");
+        }
     }
     
 	protected static JSONObject convertISToObject(InputStream stream) {
@@ -89,23 +96,28 @@ public class ModrinthAPI {
     public static Map<String, Project> getMultipleProjects(String[] ids) {
         try {
             String idsParam = "[";
-            for (int i = 0; i < ids.size(); i++) {
+            for (int i = 0; i < ids.length; i++) {
                 idsParam += "\"" + ids[i] + "\"";
-                if (i < ids.size() - 1) {
+                if (i < ids.length - 1) {
                     idsParam += ",";
                 }
             }
             idsParam += "]";
 
-            URL endpointUrl = new URL(BASE_URL + "projects/?ids=" + idsParam);
-            HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.connect();
-            InputStream content = connection.getContent();
+            URL endpointUrl = new URL(BASE_URL + "projects?ids=" + idsParam);
+            HttpsURLConnection connection = (HttpsURLConnection) endpointUrl.openConnection();
+            InputStream content = (InputStream) connection.getContent();
 
             JSONArray parsedArray = convertISToArray(content);
-
-            Map<String, Project> projects = new HashMap<String, Project>();
-
             
+            Map<String, Project> projects = new HashMap<String, Project>();
+            
+            for (Object projectObj : parsedArray) {
+                Project project = Project.fromJson((JSONObject) projectObj);
+                projects.put(project.id, project);
+            }
+            
+            return projects;
         } catch (Exception e) {
             System.err.println("Failed to grab multiple project details for: " + ids);
             e.printStackTrace();
@@ -121,11 +133,19 @@ public class ModrinthAPI {
         UPDATED
     }
 
-    public static Project[] searchProjects(String query, String facets = "", SortMethod sortMethod = SortMethod.RELEVANCE, int offset = 0, int limit = 20) {
+    public static ProjectSearchResult[] searchProjects(String query) {
+        return searchProjects(query, SortMethod.RELEVANCE);
+    }
+
+    public static ProjectSearchResult[] searchProjects(String query, SortMethod sortMethod) {
+        return searchProjects(query, sortMethod, "", 0, 20);
+    }
+
+    public static ProjectSearchResult[] searchProjects(String query, SortMethod sortMethod, String facets, int offset, int limit) {
         try {
-            String urlStr = BASE_URL + "search/?";
+            String urlStr = BASE_URL + "search?";
             if (query != "") {
-                urlStr += "query=" + URLEncoder.encode(query) + "&";
+                urlStr += "query=" + URLEncoder.encode(query, "UTF-8") + "&";
             }
             if(facets != "") {
                 urlStr += "facets=" + facets + "&";
@@ -170,5 +190,9 @@ public class ModrinthAPI {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to grab the details for: " + id);
 		}
+	}
+
+	public static UserInfo getUser(String id) {
+		
 	}
 }
